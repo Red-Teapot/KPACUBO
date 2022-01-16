@@ -1,38 +1,71 @@
 use bevy::prelude::*;
-use std::cell::Cell;
+use gloo_events::EventListener;
+use std::sync::mpsc::{channel, Receiver};
 use wasm_bindgen::prelude::*;
 
-// Wasm is single-threaded anyways
-thread_local! {
-    static RESIZE_HINT: Cell<Option<(f32, f32)>> = Cell::new(None);
-}
-
-#[wasm_bindgen]
+#[wasm_bindgen(start)]
 pub fn web_main() {
     console_error_panic_hook::set_once();
 
     let mut app = App::new();
 
+    app.add_startup_system(setup_resize_handler);
     app.add_system(resize_system);
 
     crate::run(&mut app);
 }
 
-// FIXME Replace this check called each frame with something proper
-fn resize_system(mut windows: ResMut<Windows>) {
-    RESIZE_HINT.with(|hint| {
-        if let Some((width, height)) = hint.get() {
-            windows.get_primary_mut().map(|windows| {
-                windows.set_resolution(width as f32, height as f32);
-                hint.set(None);
-            });
-        }
-    });
+struct CanvasResize {
+    listener: EventListener,
+    receiver: Receiver<()>,
 }
 
-#[wasm_bindgen]
-pub fn handle_resize(width: f32, height: f32) {
-    RESIZE_HINT.with(|hint| {
-        hint.set(Some((width, height)));
+// Wasm is single-threaded anyways
+unsafe impl Send for CanvasResize {}
+unsafe impl Sync for CanvasResize {}
+
+/// Setups a resize event listener for the browser window
+/// to resize the canvas appropriately.
+fn setup_resize_handler(mut commands: Commands) {
+    let (sender, receiver) = channel();
+
+    // Resize the canvas when starting just in case
+    sender.send(()).unwrap_throw();
+
+    let web_window = web_sys::window().unwrap_throw();
+    let listener = EventListener::new(&web_window, "resize", move |event| {
+        sender.send(()).unwrap_throw();
     });
+
+    commands.insert_resource(CanvasResize { listener, receiver });
+}
+
+/// Resizes the canvas when the browser window gets resized.
+fn resize_system(mut windows: ResMut<Windows>, resize: Res<CanvasResize>) {
+    let mut update = false;
+
+    if let Ok(_) = resize.receiver.try_recv() {
+        // Coalesce multiple events into one update
+        update = true;
+    }
+
+    if update {
+        let web_window = web_sys::window().unwrap_throw();
+
+        let width = web_window
+            .inner_width()
+            .unwrap_throw()
+            .as_f64()
+            .unwrap_throw() as f32;
+        let height = web_window
+            .inner_height()
+            .unwrap_throw()
+            .as_f64()
+            .unwrap_throw() as f32;
+
+        windows
+            .get_primary_mut()
+            .unwrap_throw()
+            .set_resolution(width, height);
+    }
 }

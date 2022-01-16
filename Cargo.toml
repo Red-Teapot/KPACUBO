@@ -47,6 +47,7 @@ rand = "0.8"
 console_error_panic_hook = "0.1"
 # Used for resizing the canvas to fit the window
 web-sys = { version = "0.3", features = ["Window"] }
+gloo-events = "0.1.1"
 
 [profile.dev.package."*"]
 # Compile all dependencies as release for extra fast

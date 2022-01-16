@@ -76,19 +76,7 @@
                 pos += chunk.byteLength;
             }
 
-            const module = await init(wasmBytes);
-
-            function handleResize() {
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-
-                module.handle_resize(width, height);
-            }
-
-            window.onresize = handleResize;
-            handleResize();
-
-            module.web_main();
+            await init(wasmBytes);
         }
 
         load('./pkg/kpacubo_bg.wasm');
