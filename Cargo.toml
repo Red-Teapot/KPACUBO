@@ -52,3 +52,6 @@ gloo-events = "0.1.1"
 [profile.dev.package."*"]
 # Compile all dependencies as release for extra fast
 opt-level=3
+
+[profile.release]
+lto = "thin"

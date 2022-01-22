@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
-    <title>KPACUBO</title>
+    <title><!<!PROJECT_NAME!>!></title>
     <style>
         html, body {
             width: 100%;
@@ -44,7 +44,7 @@
 </head>
 <body>
     <script type="module">
-        import init from "./pkg/kpacubo.js";
+        import init from "./<!<!PROJECT_NAME!>!>.js";
 
         async function load(wasmPath) {
             const response = await fetch(wasmPath);
@@ -79,7 +79,7 @@
             await init(wasmBytes);
         }
 
-        load('./pkg/kpacubo_bg.wasm');
+        load('./<!<!PROJECT_NAME!>!>.wasm');
     </script>
     <div class="preloader-wrap" id="wrap">
         <div class="bar-container">

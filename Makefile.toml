@@ -1,0 +1,173 @@
+env_files = [ './butler.env' ]
+
+[env]
+PROJECT_NAME = 'kpacubo'
+ITCH_USER = 'redteapot'
+ITCH_GAME = 'test'
+
+[tasks.prepare-release-dir]
+script_runner = '@duckscript'
+script = '''
+rm -r release
+mkdir release/web
+mkdir release/windows
+'''
+
+[tasks.prepare-assets]
+condition = { env_set = ['PLATFORM'] }
+script_runner = '@duckscript'
+script = '''
+pngs = glob_array assets/**/*.png
+wavs = glob_array assets/**/*.wav
+oggs = glob_array assets/**/*.ogg
+fnts = glob_array assets/**/*.fnt
+
+all = array_concat ${pngs} ${wavs} ${oggs}
+
+for path in ${all}
+    cp ${path} release/${PLATFORM}/${path}
+end
+'''
+
+[tasks.create-package]
+condition = { env_set = ['PLATFORM'] }
+script_runner = '@rust'
+script = '''
+//! ```cargo
+//! [dependencies]
+//! zip = "0.5"
+//! walkdir = "2.3"
+//! envmnt = "0.9"
+//! ```
+
+use std::io::prelude::*;
+use std::io::{ Seek, Write };
+use walkdir::{ DirEntry, WalkDir };
+use std::path::{ Path, PathBuf };
+use zip::write::FileOptions;
+use std::fs::File;
+
+fn main() {
+    let platform = envmnt::get_or_panic("PLATFORM");
+    let project_name = envmnt::get_or_panic("PROJECT_NAME");
+
+    let src_dir = format!("release/{}", platform);
+    println!("Package src dir: {:?}", &src_dir);
+
+    let out_path = PathBuf::from(format!("release/{}-{}.zip", project_name, platform));
+    let out_file = File::create(&out_path).unwrap();
+
+    let walkdir = WalkDir::new(&src_dir);
+    let iter = walkdir.into_iter();
+    zip_dir(&mut iter.filter_map(|e| e.ok()), &src_dir, out_file, zip::CompressionMethod::Deflated).unwrap();
+}
+
+fn zip_dir<T>(
+    it: &mut dyn Iterator<Item = DirEntry>,
+    prefix: &str,
+    writer: T,
+    method: zip::CompressionMethod,
+) -> zip::result::ZipResult<()>
+where
+    T: Write + Seek,
+{
+    let mut zip = zip::ZipWriter::new(writer);
+    let options = FileOptions::default()
+        .compression_method(method)
+        .unix_permissions(0o755);
+
+    let mut buffer = Vec::new();
+    for entry in it {
+        let path = entry.path();
+        let name = path.strip_prefix(Path::new(prefix)).unwrap();
+
+        // Write file or directory explicitly
+        // Some unzip tools unzip files with directory paths correctly, some do not!
+        if path.is_file() {
+            println!("Adding file {:?} as {:?} ...", path, name);
+            #[allow(deprecated)]
+            zip.start_file_from_path(name, options)?;
+            let mut f = File::open(path)?;
+
+            f.read_to_end(&mut buffer)?;
+            zip.write_all(&*buffer)?;
+            buffer.clear();
+        } else if name.as_os_str().len() != 0 {
+            // Only if not root! Avoids path spec / warning
+            // and mapname conversion failed error on unzip
+            println!("Adding dir {:?} as {:?} ...", path, name);
+            #[allow(deprecated)]
+            zip.add_directory_from_path(name, options)?;
+        }
+    }
+    zip.finish()?;
+    Result::Ok(())
+}
+'''
+
+[tasks.compile-web]
+command = "wasm-pack"
+args = ["build", "--target", "web"]
+install_crate = { crate_name = "wasm-pack", test_arg = "--help" }
+
+[tasks.prepare-assets-web]
+env = { 'PLATFORM' = 'web' }
+run_task = 'prepare-assets'
+
+[tasks.prepare-web]
+env = { 'PLATFORM' = 'web' }
+dependencies = ['prepare-release-dir', 'compile-web', 'prepare-assets-web']
+script_runner = '@duckscript'
+script = '''
+index_html = readfile web/index.html
+index_html = replace ${index_html} "<!<!PROJECT_NAME!>!>" ${PROJECT_NAME}
+writefile release/${PLATFORM}/index.html ${index_html}
+
+cp pkg/${PROJECT_NAME}_bg.wasm release/${PLATFORM}/${PROJECT_NAME}.wasm
+cp pkg/${PROJECT_NAME}.js release/${PLATFORM}/${PROJECT_NAME}.js
+'''
+
+[tasks.create-package-web]
+alias = 'create-package'
+
+[tasks.release-web]
+env = { 'PLATFORM' = 'web' }
+dependencies = ['prepare-web']
+run_task = 'create-package-web'
+
+[tasks.compile-windows]
+command = "cargo"
+args = ["build", "--release", "--target", "x86_64-pc-windows-msvc"]
+
+[tasks.prepare-assets-windows]
+env = { 'PLATFORM' = 'windows' }
+run_task = 'prepare-assets'
+
+[tasks.prepare-windows]
+env = { 'PLATFORM' = 'windows' }
+dependencies = ['prepare-release-dir', 'compile-windows', 'prepare-assets-windows']
+script_runner = '@duckscript'
+script = '''
+cp target/x86_64-pc-windows-msvc/release/${PROJECT_NAME}-desktop.exe release/${PLATFORM}/${PROJECT_NAME}-desktop.exe
+'''
+
+[tasks.create-package-windows]
+alias = 'create-package'
+
+[tasks.release-windows]
+env = { 'PLATFORM' = 'windows' }
+dependencies = ['prepare-windows']
+run_task = 'create-package-windows'
+
+[tasks.release]
+dependencies = ['release-web', 'release-windows']
+
+[tasks.publish]
+clear = true
+condition = { env_set = ['BUTLER_EXE'] }
+dependencies = ['release']
+script_runner = '@duckscript'
+script = '''
+exec ${BUTLER_EXE} push release/${PROJECT_NAME}-web.zip ${ITCH_USER}/${ITCH_GAME}:web
+exec ${BUTLER_EXE} push release/${PROJECT_NAME}-windows.zip ${ITCH_USER}/${ITCH_GAME}:windows
+'''
