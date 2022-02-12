@@ -52,6 +52,13 @@ Don't forget to make the game project first in the dashboard.
 
 Add the code to set up your Bevy application to `src/game.rs`.
 
+### Assets
+
+The Makefile is configured to package files of specific types.
+By default, these are `png`, `wav`, `ogg`, and `ttf`.
+If you need to package other file types, 
+modify the `prepare-assets` task in `Makefile.toml`.
+
 ## License
 
 KPACUBO (this template) is free and open source! All code in this repository 
