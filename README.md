@@ -46,6 +46,7 @@ These will be located in the freshly-created `release` folder.
 
 To build and upload your game, run `cargo make publish`. This will build
 the ZIP archives and upload them to Itch.io via Butler.
+Don't forget to make the game project first in the dashboard.
 
 ## License
 
