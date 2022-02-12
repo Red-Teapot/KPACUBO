@@ -48,6 +48,10 @@ To build and upload your game, run `cargo make publish`. This will build
 the ZIP archives and upload them to Itch.io via Butler.
 Don't forget to make the game project first in the dashboard.
 
+### Code
+
+Add the code to set up your Bevy application to `src/game.rs`.
+
 ## License
 
 KPACUBO (this template) is free and open source! All code in this repository 
