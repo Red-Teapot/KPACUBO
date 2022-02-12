@@ -2,8 +2,6 @@ env_files = [ './butler.env' ]
 
 [env]
 PROJECT_NAME = 'kpacubo'
-ITCH_USER = 'redteapot'
-ITCH_GAME = 'test'
 
 [tasks.prepare-release-dir]
 script_runner = '@duckscript'
@@ -17,20 +15,28 @@ mkdir release/windows
 condition = { env_set = ['PLATFORM'] }
 script_runner = '@duckscript'
 script = '''
+assets = array
+
 pngs = glob_array assets/**/*.png
+assets = array_concat ${assets} ${pngs}
+
 wavs = glob_array assets/**/*.wav
+assets = array_concat ${assets} ${wavs}
+
 oggs = glob_array assets/**/*.ogg
-fnts = glob_array assets/**/*.fnt
+assets = array_concat ${assets} ${oggs}
 
-all = array_concat ${pngs} ${wavs} ${oggs}
+ttfs = glob_array assets/**/*.ttf
+assets = array_concat ${assets} ${ttfs}
 
-for path in ${all}
+for path in ${assets}
     cp ${path} release/${PLATFORM}/${path}
 end
 '''
 
 [tasks.create-package]
 condition = { env_set = ['PLATFORM'] }
+# TODO: Use something more lightweight here to zip the files
 script_runner = '@rust'
 script = '''
 //! ```cargo
