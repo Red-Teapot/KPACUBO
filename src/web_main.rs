@@ -44,7 +44,7 @@ fn setup_resize_handler(mut commands: Commands) {
 fn resize_system(mut windows: ResMut<Windows>, resize: Res<CanvasResize>) {
     let mut update = false;
 
-    if let Ok(_) = resize.receiver.try_recv() {
+    while let Ok(_) = resize.receiver.try_recv() {
         // Coalesce multiple events into one update
         update = true;
     }
