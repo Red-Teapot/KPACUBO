@@ -34,7 +34,6 @@ features = ["ogg", "wav"]
 [dependencies]
 # Utilities
 wasm-bindgen = "0.2"
-#log = "0.4"
 rand = "0.8"
 
 # Native dependencies
