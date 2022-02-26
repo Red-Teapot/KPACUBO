@@ -44,6 +44,8 @@
 </head>
 <body>
     <script type="module">
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        
         import init from "./<!<!PROJECT_NAME!>!>.js";
 
         async function load(wasmPath) {
