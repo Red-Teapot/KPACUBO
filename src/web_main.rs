@@ -16,6 +16,7 @@ pub fn web_main() {
 }
 
 struct CanvasResize {
+    #[allow(dead_code)]
     listener: EventListener,
     receiver: Receiver<()>,
 }
@@ -33,7 +34,7 @@ fn setup_resize_handler(mut commands: Commands) {
     sender.send(()).unwrap_throw();
 
     let web_window = web_sys::window().unwrap_throw();
-    let listener = EventListener::new(&web_window, "resize", move |event| {
+    let listener = EventListener::new(&web_window, "resize", move |_event| {
         sender.send(()).unwrap_throw();
     });
 
