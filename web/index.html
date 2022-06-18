@@ -49,10 +49,10 @@
         import init from "./<!<!PROJECT_NAME!>!>.js";
 
         async function load(wasmPath) {
+            const totalLength = <!<!WASM_FILE_SIZE!>!>;
             const response = await fetch(wasmPath);
 
-            const totalLengthHeader = +response.headers.get('Content-Length');
-            let totalLength = 0;
+            let receivedLength = 0;
 
             let chunks = new Array();
 
@@ -65,13 +65,13 @@
                     document.getElementById('wrap').remove();
                     break;
                 } else {
-                    totalLength += value.byteLength;
+                    receivedLength += value.byteLength;
                     chunks.push(value);
-                    document.getElementById('bar').style['width'] = (100 * totalLength / totalLengthHeader) + '%';
+                    document.getElementById('bar').style['width'] = (100 * receivedLength / totalLength) + '%';
                 }
             }
 
-            let wasmBytes = new Uint8Array(totalLength);
+            let wasmBytes = new Uint8Array(receivedLength);
             let pos = 0;
             for (let chunk of chunks) {
                 wasmBytes.set(chunk, pos);

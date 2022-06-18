@@ -30,8 +30,11 @@ This enables only building the ZIP files.
 > **NOTE:** The makefile uses [wasm-pack](https://rustwasm.github.io/wasm-pack/) for, 
 > well, building the Wasm module. It should be installed automatically when running the first build.
 
-After everything is set up, run `cargo make release` to build the ZIP archives.
+After everything is set up, run `cargo make zip` to build the ZIP archives.
 These will be located in the freshly-created `release` folder.
+
+If you want only the Web or Windows build, use `cargo make zip-web` 
+or `cargo make zip-windows` correspondingly.
 
 ### Itch.io Upload
 
@@ -45,8 +48,11 @@ These will be located in the freshly-created `release` folder.
       then `ITCH_NAME` should be `example-game`.
 
 To build and upload your game, run `cargo make publish`. This will build
-the ZIP archives and upload them to Itch.io via Butler.
+the game for both Web and Windows and upload it to Itch.io via Butler.
 Don't forget to make the game project first in the dashboard.
+
+If you want to upload only the Web or Windows version, use 
+`cargo make publish-web` or `cargo make publish-windows` correspondingly.
 
 ### Code
 
@@ -57,7 +63,7 @@ Add the code to set up your Bevy application to `src/game.rs`.
 The Makefile is configured to package files of specific types.
 By default, these are `png`, `wav`, `ogg`, and `ttf`.
 If you need to package other file types, 
-modify the `prepare-assets` task in `Makefile.toml`.
+modify the `collect-assets` task in `Makefile.toml`.
 
 ## License
 
