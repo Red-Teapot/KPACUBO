@@ -15,7 +15,7 @@ path = "src/desktop_main.rs"
 
 # Audio formats should be enabled only in bevy_kira_audio
 [dependencies.bevy]
-version = "0.6"
+version = "0.7"
 default-features = false
 features = [
     "render",
@@ -27,7 +27,7 @@ features = [
 
 # Apparently this is better than built-in Bevy audio system
 [dependencies.bevy_kira_audio]
-version = "0.8"
+version = "0.10"
 default-features = false
 features = ["ogg", "wav"]
 
@@ -46,7 +46,7 @@ rand = "0.8"
 console_error_panic_hook = "0.1"
 # Used for resizing the canvas to fit the window
 web-sys = { version = "0.3", features = ["Window"] }
-gloo-events = "0.1.1"
+gloo-events = "0.1"
 
 [profile.dev.package."*"]
 # Compile all dependencies as release for extra fast
