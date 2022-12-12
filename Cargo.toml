@@ -5,17 +5,15 @@ edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-path = "src/lib.rs"
+path = "src/game.rs"
 
 [[bin]]
-name = "kpacubo-desktop"
+name = "kpacubo-windows"
 path = "src/desktop_main.rs"
-
-# Opinionated, aimed mostly at 2D games
 
 # Audio formats should be enabled only in bevy_kira_audio
 [dependencies.bevy]
-version = "0.7"
+version = "0.9.1"
 default-features = false
 features = [
     "render",
@@ -27,7 +25,7 @@ features = [
 
 # Apparently this is better than built-in Bevy audio system
 [dependencies.bevy_kira_audio]
-version = "0.10"
+version = "0.13.0"
 default-features = false
 features = ["ogg", "wav"]
 
