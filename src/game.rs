@@ -27,10 +27,6 @@ fn setup(
 
     commands.spawn(SpriteBundle {
         texture: assets.load("character.png"),
-        sprite: Sprite {
-            color: Color::WHITE,
-            ..default()
-        },
         ..default()
     });
 
