@@ -147,9 +147,9 @@ dependencies = ['distrib-web']
 run_task = 'zip-platform'
 
 [tasks.publish-web]
+env_files = [ './butler.env' ]
 env = { 'PLATFORM' = 'web' }
 dependencies = ['distrib-web']
-condition = { env_set = ['BUTLER_EXE'] }
 script_runner = '@duckscript'
 script = '''
 exec ${BUTLER_EXE} push release/web ${ITCH_USER}/${ITCH_GAME}:web --userversion ${CARGO_MAKE_PROJECT_VERSION}
@@ -181,9 +181,9 @@ dependencies = ['distrib-windows']
 run_task = 'zip-platform'
 
 [tasks.publish-windows]
+env_files = [ './butler.env' ]
 env = { 'PLATFORM' = 'windows' }
 dependencies = ['distrib-windows']
-condition = { env_set = ['BUTLER_EXE'] }
 script_runner = '@duckscript'
 script = '''
 exec ${BUTLER_EXE} push release/windows ${ITCH_USER}/${ITCH_GAME}:windows --userversion ${CARGO_MAKE_PROJECT_VERSION}

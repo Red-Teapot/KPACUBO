@@ -13,10 +13,17 @@ path = "src/desktop_main.rs"
 
 # Audio formats should be enabled only in bevy_kira_audio
 [dependencies.bevy]
-version = "0.9.1"
+version = "0.10.0"
 default-features = false
 features = [
-    "render",
+    "bevy_animation",
+    "bevy_asset",
+    "bevy_core_pipeline",
+    "bevy_render",
+    "bevy_scene",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
     "bevy_winit",
     "png",
     "x11",
@@ -26,7 +33,7 @@ features = [
 
 # Apparently this is better than built-in Bevy audio system
 [dependencies.bevy_kira_audio]
-version = "0.13.0"
+version = "0.15.0"
 default-features = false
 features = ["ogg", "wav"]
 

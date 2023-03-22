@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::window::WindowResolution;
 use gloo_events::EventListener;
 use std::sync::mpsc::{channel, Receiver};
 use wasm_bindgen::prelude::*;
@@ -43,7 +44,7 @@ fn setup_resize_handler(mut commands: Commands) {
 }
 
 /// Resizes the canvas when the browser window gets resized.
-fn resize_system(mut windows: ResMut<Windows>, resize: Res<CanvasResize>) {
+fn resize_system(mut windows: Query<&mut Window>, resize: Res<CanvasResize>) {
     let mut update = false;
 
     while let Ok(_) = resize.receiver.try_recv() {
@@ -65,9 +66,6 @@ fn resize_system(mut windows: ResMut<Windows>, resize: Res<CanvasResize>) {
             .as_f64()
             .unwrap_throw() as f32;
 
-        windows
-            .get_primary_mut()
-            .unwrap_throw()
-            .set_resolution(width, height);
+        windows.single_mut().resolution.set(width, height);
     }
 }
